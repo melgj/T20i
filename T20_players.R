@@ -69,7 +69,9 @@ batsmen <- batsmen[Country %in% ctry]
 bowlers <- bowlers[Country %in% ctry]
 
 setorder(bowlers, Econ.x, SR.x)
-setorder(batsmen, -SR.x, -Ave.x)
+setorder(batsmen, -Ave.x, -SR.x)
 
 fwrite(bowlers, "topT20_bowlers.csv")
 fwrite(batsmen, "topT20_batsmen.csv")
+
+merge.data.table(bowlers, batsmen, by = "Player", all.x = FALSE, all.y = FALSE)
