@@ -36,6 +36,12 @@ bbb[, fielder_wicket := ifelse(wicket_type %in% fielder_wicket_type, 1L, 0L)]
 bbb[, wicket_lost := ifelse(bowler_wicket + fielder_wicket > 0L, 1L, 0L)]
 
 
+bbb[, .(Team_Batting_SR = (sum(runs_off_bat) / .N) * 100,
+        Matches = length(unique(match_id))), by = batting_team][order(-Team_Batting_SR)][Matches >= 50]
+
+bbb[, .(Team_Opponent_SR = (sum(runs_off_bat) / .N) * 100,
+        Matches = length(unique(match_id))), by = bowling_team][order(Team_Opponent_SR)][Matches >= 50]
+
 bbb[]
 
 bbstats <- 
