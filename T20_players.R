@@ -54,14 +54,11 @@ xcols <- colnames(batsmen)[str_detect(colnames(batsmen), "[.]y$", negate = TRUE)
 xcols
 batsmen <- batsmen[, ..xcols]
 
-bowlers
-
 xcols <- colnames(bowlers)[str_detect(colnames(bowlers), "[.]y$", negate = TRUE)]
-xcols
+
 bowlers <- bowlers[, ..xcols]
 bowlers <- bowlers[, !(Span:`5`)]
-batsmen
-bowlers
+
 ctry <- c("SL", "AUS", "WI", "SA", "ENG", "BDESH", "AFG", "INDIA", "IRE", "ZIM", "PAK", "NZ", "NL")
 
 batsmen <- batsmen[Country %in% ctry]
@@ -70,7 +67,7 @@ bowlers <- bowlers[Country %in% ctry]
 setorder(bowlers, Econ.x, SR.x)
 setorder(batsmen, -Ave.x, -SR.x)
 
-fwrite(bowlers, "topT20_bowlers.csv")
-fwrite(batsmen, "topT20_batsmen.csv")
+#fwrite(bowlers, "topT20_bowlers.csv")
+#fwrite(batsmen, "topT20_batsmen.csv")
 
 merge.data.table(bowlers, batsmen, by = "Player", all.x = FALSE, all.y = FALSE)

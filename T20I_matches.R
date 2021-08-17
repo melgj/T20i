@@ -8,14 +8,8 @@ fls <- list.files("data/T20i/", pattern = "[0-9].csv", full.names = TRUE)
 
 bbb <- do.call("rbind", lapply(fls, fread))
 
-unique(bbb$wicket_type)
-table(bbb$wicket_type)
-class(bbb$start_date)
-
 current_batsmen <- bbb[, .(last_played = max(start_date)), by = .(striker, batting_team)][last_played >= "2021-01-01"]
 current_bowlers <- bbb[, .(last_played = max(start_date)), by = .(bowler, bowling_team)][last_played >= "2021-01-01"]
-
-bbb[]
 
 bowler_wicket_type <- c("bowled", "caught", "caught and bowled", "hit wicket", "lbw",
                    "stumped")
@@ -42,8 +36,6 @@ bbb[, .(Team_Batting_SR = (sum(runs_off_bat) / .N) * 100,
 bbb[, .(Team_Opponent_SR = (sum(runs_off_bat) / .N) * 100,
         Matches = length(unique(match_id))), by = bowling_team][order(Team_Opponent_SR)][Matches >= 50]
 
-bbb[]
-
 bbstats <- 
   bbb[striker %in% current_batsmen$striker, .(total_runs_scored = sum(runs_off_bat),
           balls_faced = .N,
@@ -54,9 +46,6 @@ bbstats <-
             innings >= 20][
               order(-runs_per_bowler_dismissal)]
 
-bbstats
-
-
 fldout <- bbb[, .(fielder_dismissal = sum(fielder_wicket)), by = player_dismissed]
 
 batdf <- merge.data.table(bbstats, fldout, by.x = "striker", by.y = "player_dismissed", all.x = TRUE)
@@ -66,8 +55,6 @@ batdf[, batAvg := total_runs_scored / (dismissed_by_bowler + fielder_dismissal)]
 
 setorder(batdf, -batAvg)
 batsmenT50 <- batdf[1:50]
-
-batsmenT50
 
 bowlstats <- 
   bbb[bowler %in% current_bowlers$bowler, .(runs_conceded_bat = sum(runs_off_bat), 
@@ -82,8 +69,6 @@ bowlstats <-
               order(bowlAvg)]
 
 bowlersT50 <- bowlstats[1:50]
-bowlersT50
-
 
 
 #### Powerplay
@@ -100,9 +85,6 @@ bbpp <-
         innings >= 20][
           order(-runs_per_bowler_dismissal)]
 
-bbpp
-
-
 fldppout <- bbb[powerplay == TRUE, .(fielder_dismissal = sum(fielder_wicket)), by = player_dismissed]
 
 batpp <- merge.data.table(bbpp, fldppout, by.x = "striker", by.y = "player_dismissed", all.x = TRUE)
@@ -112,8 +94,6 @@ batpp[, batAvg := total_runs_scored / (dismissed_by_bowler + fielder_dismissal)]
 
 setorder(batpp, -batAvg)
 batsmenPPT30 <- batpp[1:30]
-
-batsmenPPT30
 
 bowlpp <- 
   bbb[bowler %in% current_bowlers$bowler & powerplay == TRUE, .(runs_conceded_bat = sum(runs_off_bat), 
@@ -128,7 +108,6 @@ bowlpp <-
                                                 order(bowlAvg)]
 
 bowlersPPT30 <- bowlpp[1:30]
-bowlersPPT30
 
 
 #### Excluding Powerplay
@@ -145,9 +124,6 @@ bbxp <-
         innings >= 20][
           order(-runs_per_bowler_dismissal)]
 
-bbxp
-
-
 fldxpout <- bbb[powerplay == FALSE, .(fielder_dismissal = sum(fielder_wicket)), by = player_dismissed]
 
 batxp <- merge.data.table(bbxp, fldxpout, by.x = "striker", by.y = "player_dismissed", all.x = TRUE)
@@ -157,8 +133,6 @@ batxp[, batAvg := total_runs_scored / (dismissed_by_bowler + fielder_dismissal)]
 
 setorder(batxp, -batAvg)
 batsmenXPT30 <- batxp[1:30]
-
-batsmenXPT30
 
 bowlxp <- 
   bbb[bowler %in% current_bowlers$bowler & powerplay == FALSE, .(runs_conceded_bat = sum(runs_off_bat), 
@@ -173,4 +147,5 @@ bowlxp <-
                                                                     order(bowlAvg)]
 
 bowlersXPT30 <- bowlxp[1:30]
-bowlersXPT30
+
+
