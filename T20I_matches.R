@@ -85,6 +85,9 @@ bbpp <-
         innings >= 20][
           order(-runs_per_bowler_dismissal)]
 
+bbpp
+
+
 fldppout <- bbb[powerplay == TRUE, .(fielder_dismissal = sum(fielder_wicket)), by = player_dismissed]
 
 batpp <- merge.data.table(bbpp, fldppout, by.x = "striker", by.y = "player_dismissed", all.x = TRUE)
