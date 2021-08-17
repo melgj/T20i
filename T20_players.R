@@ -2,7 +2,6 @@ library(cricketr)
 library(data.table)
 library(robotstxt)
 library(rvest)
-library(readr)
 library(stringr)
 
 paths_allowed("https://stats.espncricinfo.com/ci/content/records/282912.html")
