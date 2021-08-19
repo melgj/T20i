@@ -28,13 +28,13 @@ bbb[, bowler_runs_conceded := cumsum(runs_off_bat), by = .(bowler, bowling_team,
 bbb[, bowler_wicket := ifelse(wicket_type %in% bowler_wicket_type, 1L, 0L)]
 bbb[, fielder_wicket := ifelse(wicket_type %in% fielder_wicket_type, 1L, 0L)]
 bbb[, wicket_lost := ifelse(bowler_wicket + fielder_wicket > 0L, 1L, 0L)]
+bbb[, wickets_innings := cumsum(wicket_lost), by = .(match_id, batting_team)]
 
-
-bbb[, .(Team_Batting_SR = (sum(runs_off_bat) / .N) * 100,
-        Matches = length(unique(match_id))), by = batting_team][order(-Team_Batting_SR)][Matches >= 50]
-
-bbb[, .(Team_Opponent_SR = (sum(runs_off_bat) / .N) * 100,
-        Matches = length(unique(match_id))), by = bowling_team][order(Team_Opponent_SR)][Matches >= 50]
+# bbb[, .(Team_Batting_SR = (sum(runs_off_bat) / .N) * 100,
+#         Matches = length(unique(match_id))), by = batting_team][order(-Team_Batting_SR)][Matches >= 50]
+# 
+# bbb[, .(Team_Opponent_SR = (sum(runs_off_bat) / .N) * 100,
+#         Matches = length(unique(match_id))), by = bowling_team][order(Team_Opponent_SR)][Matches >= 50]
 
 bbstats <- 
   bbb[striker %in% current_batsmen$striker, .(total_runs_scored = sum(runs_off_bat),
@@ -42,9 +42,10 @@ bbstats <-
           SR = sum((runs_off_bat / .N) * 100),
           innings = length(unique(match_id)),
           dismissed_by_bowler = sum(bowler_wicket),
-          runs_per_bowler_dismissal = sum(runs_off_bat) / sum(bowler_wicket)), by = .(striker, batting_team)][
-            innings >= 20][
-              order(-runs_per_bowler_dismissal)]
+          runs_per_bowler_dismissal = sum(runs_off_bat) / sum(bowler_wicket)), 
+      by = .(striker, batting_team)][
+        innings >= 20][
+          order(-runs_per_bowler_dismissal)]
 
 fldout <- bbb[, .(fielder_dismissal = sum(fielder_wicket)), by = player_dismissed]
 
@@ -74,19 +75,17 @@ bowlersT50 <- bowlstats[1:50]
 #### Powerplay
 
 bbpp <- 
-  bbb[striker %in% current_batsmen$striker & powerplay == TRUE, .(total_runs_scored = sum(runs_off_bat),
-                                              balls_faced = .N,
-                                              SR = sum((runs_off_bat / .N) * 100),
-                                              innings = length(unique(match_id)),
-                                              dismissed_by_bowler = sum(bowler_wicket),
-                                              pp_outbybowler_pct = sum(bowler_wicket) / length(unique(match_id)),
-                                              runs_per_bowler_dismissal = sum(runs_off_bat) / sum(bowler_wicket)), 
+  bbb[striker %in% current_batsmen$striker & powerplay == TRUE,
+      .(total_runs_scored = sum(runs_off_bat),
+        balls_faced = .N,
+        SR = sum((runs_off_bat / .N) * 100),
+        innings = length(unique(match_id)),
+        dismissed_by_bowler = sum(bowler_wicket),
+        pp_outbybowler_pct = sum(bowler_wicket) / length(unique(match_id)),
+        runs_per_bowler_dismissal = sum(runs_off_bat) / sum(bowler_wicket)), 
       by = .(striker, batting_team)][
         innings >= 20][
           order(-runs_per_bowler_dismissal)]
-
-bbpp
-
 
 fldppout <- bbb[powerplay == TRUE, .(fielder_dismissal = sum(fielder_wicket)), by = player_dismissed]
 
@@ -99,16 +98,17 @@ setorder(batpp, -batAvg)
 batsmenPPT30 <- batpp[1:30]
 
 bowlpp <- 
-  bbb[bowler %in% current_bowlers$bowler & powerplay == TRUE, .(runs_conceded_bat = sum(runs_off_bat), 
-                                            runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-                                            total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-                                            balls_bowled = .N,
-                                            ER = sum((runs_off_bat / .N) * 6),
-                                            matches = length(unique(match_id)),
-                                            wickets = sum(bowler_wicket),
-                                            bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), by = .(bowler, bowling_team)][
-                                              balls_bowled >= 180][
-                                                order(bowlAvg)]
+  bbb[bowler %in% current_bowlers$bowler & powerplay == TRUE,
+      .(runs_conceded_bat = sum(runs_off_bat), 
+        runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        balls_bowled = .N,
+        ER = sum((runs_off_bat / .N) * 6),
+        matches = length(unique(match_id)),
+        wickets = sum(bowler_wicket),
+        bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), by = .(bowler, bowling_team)][
+          balls_bowled >= 180][
+            order(bowlAvg)]
 
 bowlersPPT30 <- bowlpp[1:30]
 
@@ -116,13 +116,14 @@ bowlersPPT30 <- bowlpp[1:30]
 #### Excluding Powerplay
 
 bbxp <- 
-  bbb[striker %in% current_batsmen$striker & powerplay == FALSE, .(total_runs_scored = sum(runs_off_bat),
-                                                                  balls_faced = .N,
-                                                                  SR = sum((runs_off_bat / .N) * 100),
-                                                                  innings = length(unique(match_id)),
-                                                                  dismissed_by_bowler = sum(bowler_wicket),
-                                                                  xp_outbybowler_pct = sum(bowler_wicket) / length(unique(match_id)),
-                                                                  runs_per_bowler_dismissal = sum(runs_off_bat) / sum(bowler_wicket)), 
+  bbb[striker %in% current_batsmen$striker & powerplay == FALSE,
+      .(total_runs_scored = sum(runs_off_bat),
+        balls_faced = .N,
+        SR = sum((runs_off_bat / .N) * 100),
+        innings = length(unique(match_id)),
+        dismissed_by_bowler = sum(bowler_wicket),
+        xp_outbybowler_pct = sum(bowler_wicket) / length(unique(match_id)),
+        runs_per_bowler_dismissal = sum(runs_off_bat) / sum(bowler_wicket)), 
       by = .(striker, batting_team)][
         innings >= 20][
           order(-runs_per_bowler_dismissal)]
@@ -138,17 +139,34 @@ setorder(batxp, -batAvg)
 batsmenXPT30 <- batxp[1:30]
 
 bowlxp <- 
-  bbb[bowler %in% current_bowlers$bowler & powerplay == FALSE, .(runs_conceded_bat = sum(runs_off_bat), 
-                                                                runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-                                                                total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-                                                                balls_bowled = .N,
-                                                                ER = sum((runs_off_bat / .N) * 6),
-                                                                matches = length(unique(match_id)),
-                                                                wickets = sum(bowler_wicket),
-                                                                bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), by = .(bowler, bowling_team)][
-                                                                  balls_bowled >= 180][
-                                                                    order(bowlAvg)]
+  bbb[bowler %in% current_bowlers$bowler & powerplay == FALSE,
+      .(runs_conceded_bat = sum(runs_off_bat), 
+        runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        balls_bowled = .N,
+        ER = sum((runs_off_bat / .N) * 6),
+        matches = length(unique(match_id)),
+        wickets = sum(bowler_wicket),
+        bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), 
+      by = .(bowler, bowling_team)][
+        balls_bowled >= 180][
+          order(bowlAvg)]
 
 bowlersXPT30 <- bowlxp[1:30]
+
+# batsmen runs per team wickets lost
+
+bblstats <- 
+  bbb[striker %in% current_batsmen$striker,
+      .(total_runs_scored = sum(runs_off_bat),
+        balls_faced = .N,
+        total_runs = sum(runs_off_bat),
+        SR = sum((runs_off_bat / .N) * 100)),
+      by = .(striker, batting_team, wickets_innings)][
+        balls_faced >= 100][
+          order(wickets_innings, -SR)]
+
+bblstats[, .SD[1L:5L], by = wickets_innings]
+
 
 
