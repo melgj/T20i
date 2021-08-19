@@ -8,8 +8,10 @@ fls <- list.files("data/T20i/", pattern = "[0-9].csv", full.names = TRUE)
 
 bbb <- do.call("rbind", lapply(fls, fread))
 
-current_batsmen <- bbb[, .(last_played = max(start_date)), by = .(striker, batting_team)][last_played >= "2021-01-01"]
-current_bowlers <- bbb[, .(last_played = max(start_date)), by = .(bowler, bowling_team)][last_played >= "2021-01-01"]
+current_batsmen <- bbb[, .(last_played = max(start_date)), 
+                       by = .(striker, batting_team)][last_played >= "2021-01-01"]
+current_bowlers <- bbb[, .(last_played = max(start_date)), 
+                       by = .(bowler, bowling_team)][last_played >= "2021-01-01"]
 
 bowler_wicket_type <- c("bowled", "caught", "caught and bowled", "hit wicket", "lbw",
                    "stumped")
@@ -59,15 +61,18 @@ batsmenT50 <- batdf[1:50]
 
 bowlstats <- 
   bbb[bowler %in% current_bowlers$bowler, .(runs_conceded_bat = sum(runs_off_bat), 
-          runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-          total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+          runs_conceded_extras = 
+            sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+          total_runs_conceded = 
+            sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
           balls_bowled = .N,
           ER = sum((runs_off_bat / .N) * 6),
           matches = length(unique(match_id)),
           wickets = sum(bowler_wicket),
-          bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), by = .(bowler, bowling_team)][
-            balls_bowled >= 500][
-              order(bowlAvg)]
+          bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), 
+      by = .(bowler, bowling_team)][
+        balls_bowled >= 500][
+          order(bowlAvg)]
 
 bowlersT50 <- bowlstats[1:50]
 
@@ -100,15 +105,18 @@ batsmenPPT30 <- batpp[1:30]
 bowlpp <- 
   bbb[bowler %in% current_bowlers$bowler & powerplay == TRUE,
       .(runs_conceded_bat = sum(runs_off_bat), 
-        runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-        total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        runs_conceded_extras = 
+          sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        total_runs_conceded = 
+          sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
         balls_bowled = .N,
         ER = sum((runs_off_bat / .N) * 6),
         matches = length(unique(match_id)),
         wickets = sum(bowler_wicket),
-        bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), by = .(bowler, bowling_team)][
-          balls_bowled >= 180][
-            order(bowlAvg)]
+        bowlAvg = sum(runs_off_bat) / sum(bowler_wicket)), 
+      by = .(bowler, bowling_team)][
+        balls_bowled >= 180][
+          order(bowlAvg)]
 
 bowlersPPT30 <- bowlpp[1:30]
 
@@ -141,8 +149,10 @@ batsmenXPT30 <- batxp[1:30]
 bowlxp <- 
   bbb[bowler %in% current_bowlers$bowler & powerplay == FALSE,
       .(runs_conceded_bat = sum(runs_off_bat), 
-        runs_conceded_extras = sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
-        total_runs_conceded = sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        runs_conceded_extras = 
+          sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
+        total_runs_conceded = 
+          sum(runs_off_bat) + sum(wides, na.rm = TRUE) + sum(noballs, na.rm = TRUE) + sum(penalty, na.rm = TRUE),
         balls_bowled = .N,
         ER = sum((runs_off_bat / .N) * 6),
         matches = length(unique(match_id)),
